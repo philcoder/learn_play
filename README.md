@@ -28,7 +28,7 @@ sbt
 > exit
 ```
 
-- Import code: In IDEA go to File -> New -> ASDADS -> Select the project folder -> Select sbt (import project from external model)
+- Import code: In IDEA go to File -> New -> Project From Existing Sources -> Select the project folder -> Select sbt (import project from external model)
 
 - Run project: 
 1. Create a new Run Configuration – From the main menu, select Run -> Edit Configurations
