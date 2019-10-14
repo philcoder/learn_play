@@ -1,0 +1,13 @@
+*.class
+*.log
+
+# Generated files
+bin/
+gen/
+out/
+.cxx/
+app/.cxx
+
+# Intellij
+*.iml
+.idea/*
