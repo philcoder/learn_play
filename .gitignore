@@ -11,3 +11,20 @@ app/.cxx
 # Intellij
 *.iml
 .idea/*
+
+# Ignore Play! working directory #
+bin/
+/db
+.eclipse
+/lib/
+/logs/
+/modules
+/project/project
+/project/target
+target/*
+tmp/
+test-result
+server.pid
+*.eml
+/dist/
+.cache
