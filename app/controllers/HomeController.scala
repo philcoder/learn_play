@@ -22,4 +22,17 @@ class HomeController @Inject()(cc: ControllerComponents) (implicit assetsFinder:
     Ok(views.html.index("Your new application is ready."))
   }
 
+  def hello = Action {
+    Ok(views.html.hello(assetsFinder))
+  }
+
+  /**
+   * http://localhost:9000/hello2?name=Philipp
+   *
+   * @param name
+   */
+  def hello2(name: String) = Action {
+    Ok(views.html.hello2(name))
+  }
+
 }
