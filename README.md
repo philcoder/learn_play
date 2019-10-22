@@ -1,4 +1,4 @@
-# play-scala-starter-example
+# Learn-Play
 
 This is a starter application that shows how Play works.  Please see the documentation at <https://www.playframework.com/documentation/latest/Home> for more details.
 
@@ -38,7 +38,7 @@ sbt
 5. Apply changes and select OK.
 6. Now you can choose “Run” from the main Run menu and run your application
 
-## Running
+## Running (without IDEA)
 
 Run this using [sbt](http://www.scala-sbt.org/).  If you downloaded this project from <http://www.playframework.com/download> then you'll find a prepackaged version of sbt in the project directory:
 
@@ -49,14 +49,6 @@ sbt run
 And then go to <http://localhost:9000> to see the running web application.
 
 There are several demonstration files available in this template.
-
-## Debug
-
-For debug web app on eclipse use it.
-
-```
-sbt -jvm-debug 9999 run
-```
 
 ## Controllers
 
