@@ -50,6 +50,25 @@ And then go to <http://localhost:9000> to see the running web application.
 
 There are several demonstration files available in this template.
 
+## Running Docker Services with NoSQL, Postgres and etc.
+Go inside clone folder and execute follows commands.
+
+For startup all services
+```
+docker-compose up -d --build
+```
+For stop all services
+```
+docker-compose down
+```
+
+For stop and cleanup volumes
+```
+docker-compose down --volumes
+```
+
+Access pgAdmin: http://localhost:20000
+
 ## Controllers
 
 - `HomeController.scala`:
