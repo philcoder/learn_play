@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  postgres-service:
+    container_name: postgres-service
+    hostname: postgres-service
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: phil.poc!
+      POSTGRES_DB: poc_db
+      TZ: GMT-3
+    ports:
+      - "19000:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - postgres-compose-network
+
+  pgadmin-web:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "phil@test.com"
+      PGADMIN_DEFAULT_PASSWORD: "phil.poc!"
+    ports:
+      - "20000:80"
+    depends_on:
+      - postgres-service
+    networks:
+      - postgres-compose-network
+
+volumes:
+  db-data:
+
+networks:
+  postgres-compose-network:
+    driver: bridge
