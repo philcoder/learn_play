@@ -1,12 +1,12 @@
 name := """learn-play"""
 
-version := "1.0-SNAPSHOT"
+version := "1.0.0"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
-scalaVersion := "2.13.0"
+scalaVersion := "2.13.1"
 
 libraryDependencies += guice
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.3" % Test
