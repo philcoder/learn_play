@@ -1,63 +1,77 @@
 package controllers
 
+import java.util.NoSuchElementException
+
 import javax.inject._
 import models.User
 import persistences.UserRepository
-import play.api.libs.json.{JsArray, JsNull, JsNumber, JsObject, JsString, JsValue, Json}
+import play.api.libs.json._
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-/**
- * This controller creates an `Action` to handle HTTP requests to the
- * application's home page.
- */
-class UserController @Inject()(userService: UserRepository, cc: MessagesControllerComponents)(implicit ec: ExecutionContext)
-  extends MessagesAbstractController(cc) {
+@Singleton
+class UserController @Inject()(val cc: ControllerComponents)(implicit assetsFinder: AssetsFinder)
+  extends AbstractController(cc) {
 
-  def hello = Action.async {
-    val json: JsValue = JsObject(Seq(
-      "name" -> JsString("Watership Down"),
-      "location" -> JsObject(Seq("lat" -> JsNumber(51.235685), "long" -> JsNumber(-1.309197))),
-      "residents" -> JsArray(IndexedSeq(
-        JsObject(Seq(
-          "name" -> JsString("Fiver"),
-          "age" -> JsNumber(4),
-          "role" -> JsNull
-        )),
-        JsObject(Seq(
-          "name" -> JsString("Bigwig"),
-          "age" -> JsNumber(6),
-          "role" -> JsString("Owsla")
-        ))
-      ))
-    ))
+  def add = Action.async(parse.json) { request =>
+    val placeResult = request.body.validate[User]
+    placeResult.fold(
+      errors => {
+        Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> JsError.toJson(errors))))
+      },
+      user => {
+        try{
+          UserRepository.add(user)
+          Future.successful(Ok(Json.obj("status" -> "ok", "message" -> ("User '" + user.id + "' added."))))
+        }catch{
+          case e:NoSuchElementException =>
+            Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> s"User id:${user.id} not found")))
+        }
+      }
+    )
+  }
+
+  def update = Action.async(parse.json) { request =>
+    val placeResult = request.body.validate[User]
+    placeResult.fold(
+      errors => {
+        Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> JsError.toJson(errors))))
+      },
+      user => {
+        try{
+          UserRepository.update(user)
+          Future.successful(Ok(Json.obj("status" -> "ok", "message" -> ("User '" + user.id + "' updated."))))
+        }catch{
+          case e:NoSuchElementException =>
+            Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> s"User id:${user.id} not found")))
+        }
+      }
+    )
+  }
+
+  def findById(id:Int) = Action.async {
+    val user = UserRepository.findById(id)
+    if(user.isDefined){
+      val json = Json.toJson(user.get)
+      Future.successful(Ok(json))
+    }else{
+      Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> s"User id:$id not found")))
+    }
+  }
+
+  def list = Action.async {
+    val json = Json.toJson(UserRepository.list)
     Future.successful(Ok(json))
   }
 
-  def add = Action.async(parse.json) { implicit request =>
-
-    val name = (request.body \ "name").as[String]
-    val email = (request.body \ "email").as[String]
-    val pw = (request.body \ "pw").as[String]
-    val role = (request.body \ "role").as[Int]
-
-    try {
-      if (name == "" || email == "" || pw == ""){
-        //manual validation
-      }
-
-      //can't have overload constructor
-      userService.insert(new User(Option.apply(0),name, email, pw, role))
-
-      Future.successful(Ok(JsObject(Seq(
-        "msg" -> JsString(s"Insert user $name with successful"),
-      ))))
-    } catch {
-      case e:Exception=>
-        Future.successful(
-          Status(400)("Error: Unidentified error")
-        )
+  def delete(id:Int) = Action.async {
+    try{
+      UserRepository.remove(id)
+      Future.successful(Ok(s"user from id:$id was removed with successful"))
+    }catch{
+      case e:NoSuchElementException =>
+        Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> s"User id:$id not found")))
     }
   }
 }

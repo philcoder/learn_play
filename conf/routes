@@ -2,6 +2,14 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET     /hello                  controllers.UserController.hello
+GET             /hello          controllers.HomeController.hello
 
-POST     /api/user/add          controllers.UserController.add
+GET             /v1/users       controllers.UserController.list
+
+GET             /v1/user/:id    controllers.UserController.findById(id:Int)
+
+POST            /v1/user        controllers.UserController.add
+
+PUT             /v1/user        controllers.UserController.update
+
+DELETE          /v1/user/:id    controllers.UserController.delete(id:Int)
