@@ -3,7 +3,7 @@ package models
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
 import play.api.libs.functional.syntax._
 
-case class User(id:Int, name:Option[String], email:String, pw:String, role:Int)
+case class User(id:Long, name:Option[String], email:String, pw:String, role:Int)
 
 object User{
 
@@ -18,7 +18,7 @@ object User{
   }
 
   implicit val reads: Reads[User] = (
-    (JsPath \ "id").read[Int] and
+    (JsPath \ "id").read[Long] and
       (JsPath \ "name").readNullable[String] and
       (JsPath \ "email").read[String](Reads.email) and
       (JsPath \ "pw").read[String] and

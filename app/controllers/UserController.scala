@@ -8,10 +8,10 @@ import persistences.UserRepository
 import play.api.libs.json._
 import play.api.mvc._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class UserController @Inject()(val cc: ControllerComponents)(implicit assetsFinder: AssetsFinder)
+class UserController @Inject()(cc: ControllerComponents, repo: UserRepository)(implicit ec: ExecutionContext)
   extends AbstractController(cc) {
 
   def add = Action.async(parse.json) { request =>
@@ -22,8 +22,9 @@ class UserController @Inject()(val cc: ControllerComponents)(implicit assetsFind
       },
       user => {
         try{
-          UserRepository.add(user)
-          Future.successful(Ok(Json.obj("status" -> "ok", "message" -> ("User '" + user.id + "' added."))))
+          repo.add(user).map{ _ =>
+            Ok(Json.obj("status" -> "ok", "message" -> ("User '" + user.id + "' added.")))
+          }
         }catch{
           case e:NoSuchElementException =>
             Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> s"User id:${user.id} not found")))
@@ -32,7 +33,7 @@ class UserController @Inject()(val cc: ControllerComponents)(implicit assetsFind
     )
   }
 
-  def update = Action.async(parse.json) { request =>
+  def update = Action.async(parse.json) { implicit request =>
     val placeResult = request.body.validate[User]
     placeResult.fold(
       errors => {
@@ -40,8 +41,9 @@ class UserController @Inject()(val cc: ControllerComponents)(implicit assetsFind
       },
       user => {
         try{
-          UserRepository.update(user)
-          Future.successful(Ok(Json.obj("status" -> "ok", "message" -> ("User '" + user.id + "' updated."))))
+          repo.update(user).map{ _ =>
+            Ok(Json.obj("status" -> "ok", "message" -> ("User '" + user.id + "' updated.")))
+          }
         }catch{
           case e:NoSuchElementException =>
             Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> s"User id:${user.id} not found")))
@@ -50,27 +52,30 @@ class UserController @Inject()(val cc: ControllerComponents)(implicit assetsFind
     )
   }
 
-  def findById(id:Int) = Action.async {
-    val user = UserRepository.findById(id)
-    if(user.isDefined){
-      val json = Json.toJson(user.get)
-      Future.successful(Ok(json))
-    }else{
-      Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> s"User id:$id not found")))
+  def findById(id:Int) = Action.async { implicit request =>
+    repo.findById(id).map{ user =>
+      if(user.isDefined){
+        val json = Json.toJson(user.get)
+        Ok(json)
+      }else{
+        BadRequest(Json.obj("status" -> "error", "message" -> s"User id:$id not found"))
+      }
     }
   }
 
-  def list = Action.async {
-    val json = Json.toJson(UserRepository.list)
-    Future.successful(Ok(json))
+  def list = Action.async { implicit request =>
+    repo.listAll.map { user =>
+      Ok(Json.toJson(user))
+    }
   }
 
   def delete(id:Int) = Action.async {
     try{
-      UserRepository.remove(id)
-      Future.successful(Ok(s"user from id:$id was removed with successful"))
+      repo.delete(id).map{ _ =>
+        Ok(Json.obj("status" -> "ok", "message" -> (s"user from id:$id was removed with successful")))
+      }
     }catch{
-      case e:NoSuchElementException =>
+      case _:NoSuchElementException =>
         Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> s"User id:$id not found")))
     }
   }

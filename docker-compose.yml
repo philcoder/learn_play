@@ -15,6 +15,7 @@ services:
       - "19000:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
+      - ./conf/evolutions/poc_db/1.sql:/docker-entrypoint-initdb.d/1.sql
     networks:
       - postgres-compose-network
 
