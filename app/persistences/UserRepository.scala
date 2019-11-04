@@ -11,13 +11,14 @@ import slick.jdbc.PostgresProfile.api._
 
 class UserTableDef(tag: Tag) extends Table[User](tag, "user") {
 
-  def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+  def id = column[Option[Long]]("id", O.PrimaryKey, O.AutoInc)
   def name = column[Option[String]]("name")
   def email = column[String]("email")
   def pw = column[String]("pw")
   def role = column[Int]("role")
+  def state = column[Int]("state")
 
-  override def * = (id, name, email, pw, role) <> ((User.apply _).tupled, User.unapply)
+  override def * = (id, name, email, pw, role, state) <> ((User.apply _).tupled, User.unapply)
 }
 
 @Singleton
@@ -31,7 +32,7 @@ class UserRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
   }
 
   def update(user: User): Future[Int] = {
-    dbConfig.db.run(userDao.update(user))
+    dbConfig.db.run(userDao.filter(_.id === user.id).update(user))
   }
 
   def delete(id: Long): Future[Int] = {
@@ -43,6 +44,6 @@ class UserRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
   }
 
   def listAll: Future[Seq[User]] = {
-    dbConfig.db.run(userDao.result)
+    dbConfig.db.run(userDao.sortBy(_.id.asc).result)
   }
 }

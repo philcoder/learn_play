@@ -4,6 +4,7 @@ import java.util.NoSuchElementException
 
 import javax.inject._
 import models.User
+import org.postgresql.util.PSQLException
 import persistences.UserRepository
 import play.api.libs.json._
 import play.api.mvc._
@@ -21,13 +22,10 @@ class UserController @Inject()(cc: ControllerComponents, repo: UserRepository)(i
         Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> JsError.toJson(errors))))
       },
       user => {
-        try{
-          repo.add(user).map{ _ =>
-            Ok(Json.obj("status" -> "ok", "message" -> ("User '" + user.id + "' added.")))
-          }
-        }catch{
-          case e:NoSuchElementException =>
-            Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> s"User id:${user.id} not found")))
+        repo.add(user).map{ _ =>
+          Ok(Json.obj("status" -> "ok", "message" -> ("User '" + user.id + "' added.")))
+        } recover {
+          case e: PSQLException => BadRequest(Json.obj("status" -> "error", "message" -> s"${e.getMessage}"))
         }
       }
     )
@@ -40,13 +38,10 @@ class UserController @Inject()(cc: ControllerComponents, repo: UserRepository)(i
         Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> JsError.toJson(errors))))
       },
       user => {
-        try{
-          repo.update(user).map{ _ =>
-            Ok(Json.obj("status" -> "ok", "message" -> ("User '" + user.id + "' updated.")))
-          }
-        }catch{
-          case e:NoSuchElementException =>
-            Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> s"User id:${user.id} not found")))
+        repo.update(user).map{ _ =>
+          Ok(Json.obj("status" -> "ok", "message" -> ("User '" + user.id + "' updated.")))
+        } recover {
+          case e: PSQLException => BadRequest(Json.obj("status" -> "error", "message" -> s"${e.getMessage}"))
         }
       }
     )
@@ -70,13 +65,10 @@ class UserController @Inject()(cc: ControllerComponents, repo: UserRepository)(i
   }
 
   def delete(id:Int) = Action.async {
-    try{
-      repo.delete(id).map{ _ =>
-        Ok(Json.obj("status" -> "ok", "message" -> (s"user from id:$id was removed with successful")))
-      }
-    }catch{
-      case _:NoSuchElementException =>
-        Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> s"User id:$id not found")))
+    repo.delete(id).map{ _ =>
+      Ok(Json.obj("status" -> "ok", "message" -> (s"user from id:$id was removed with successful")))
+    } recover {
+      case e: PSQLException => BadRequest(Json.obj("status" -> "error", "message" -> s"${e.getMessage}"))
     }
   }
 }

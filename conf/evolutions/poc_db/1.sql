@@ -7,6 +7,7 @@ CREATE TABLE if not exists public."user"
     email character varying(150) NOT NULL,
     pw character varying(30) NOT NULL,
     role integer NOT NULL,
+    state integer NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
     CONSTRAINT email_uniq UNIQUE (email)
 );
